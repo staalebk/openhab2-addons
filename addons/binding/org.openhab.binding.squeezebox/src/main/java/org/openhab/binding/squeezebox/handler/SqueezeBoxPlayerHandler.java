@@ -109,7 +109,7 @@ public class SqueezeBoxPlayerHandler extends BaseThingHandler implements
 		mac = getThing().getConfiguration().as(SqueezeBoxPlayerConfig.class).mac;
 		timeCounter();
 		if (squeezeBoxServerHandler() != null) {
-			getThing().setStatus(
+			updateStatus(
 					squeezeBoxServerHandler().getThing().getStatus());
 		}
 	};
