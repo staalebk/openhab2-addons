@@ -1,0 +1,66 @@
+# Logitech Harmony Hub Binding
+
+The Harmony Hub binding is used to enable communication between openHAB2 and multiple Logitech Harmony Hub devices. The API exposed by the Harmony Hub is relatively limited, but it does allow for reading the current activity as well as setting the activity and sending device commands.
+
+##Overview
+
+The Harmony binding represents a "Hub" as a bridge thing type and "Devices" as things connected to the bridge.  
+
+###Hub
+
+A hub (bridge thing) represents a physical Harmony Hub.  The hub possesses a single channel with the id "currentActivity" which is a StringType set to the name of the current activity.  This channel is dynamically generated with the possible activity strings listed as channel state options. 
+
+###Devices
+
+Devices are dynamically created. There is a single device thing for every physical device configured on the harmony hub.  Each device has a single channel with the id "sendButtonPress" which sends a string with the name of the button to press on the device.  This channel is dynamically generated with the possible button press strings listed as channel state options. 
+
+## Discovery
+
+The Harmony binding will automatically find all Harmony Hubs on the local network and add them to the inbox.
+
+## Binding Configuration
+
+The binding requires no special configuration
+
+## Thing Configuration
+
+To manually configure a Harmony Hub thing you may specify its name ("name") as well as an optional search timeout value in seconds ("discoveryTimeout") . 
+ 
+In the thing file, this looks e.g. like
+```
+Thing harmonyhub:hub:GreatRoom [ name="Great Room"]
+```
+
+To manually configure a Harmony device thing you may specify its numeric id ("id") or its name ("name"), but not both. Note that this is prefixed by the hub the device is controlled from.
+ 
+In the thing file, this looks e.g. like
+```
+Thing harmonyhub:device:GreatRoom:Denon [ id="21637347"]
+```
+
+## Channels
+
+Hubs can report and change the current activity:
+
+items:
+```
+String HarmonyGreatRoomActivity              "Current Activity [%s]"  (gMain) { channel="harmonyhub:hub:GreatRoom:currentActivity" }
+```
+
+Devices can send button presses
+
+```
+String HarmonyGreatRoomDenon            "Denon ButtonPress" (gMain) { channel="harmonyhub:device:GreatRoom:Denon:sendButtonPress" }
+```
+##Example Sitemap
+
+Using the above things channels and items 
+Sitemap:
+```
+sitemap demo label="Main Menu" {
+        Frame  {
+                Switch item=HarmonyGreatRoomActivity mappings=[PowerOff="PowerOff", TIVO="TIVO", Music="Music","APPLE TV"="APPLE TV", NETFLIX="NETFLIX"]
+                Switch item=HarmonyGreatRoomDenon mappings=["Volume Up"="Volume Up","Volume Down"="Volume Down"]
+        }
+}
+```
