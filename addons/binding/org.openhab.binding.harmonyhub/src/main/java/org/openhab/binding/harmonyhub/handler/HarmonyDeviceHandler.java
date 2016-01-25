@@ -177,6 +177,7 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
                     .withType(channelTypeUID).build();
 
             thingBuilder.withChannels(channel);
+            thingBuilder.withChannel(getThing().getChannel(HarmonyHubBindingConstants.CHANNEL_BUTTON_PRESS));
             updateThing(thingBuilder.build());
         } catch (Exception e) {
             logger.error("Could not add current activity channel to hub", e);

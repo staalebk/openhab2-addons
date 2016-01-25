@@ -246,11 +246,12 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
                     .withConfiguration(getThing().getConfiguration()).withProperties(getThing().getProperties());
 
             Channel channel = ChannelBuilder
-                    .create(new ChannelUID(getThing().getUID(), HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY_DISCOVERED),
-                            "Number")
+                    .create(new ChannelUID(getThing().getUID(),
+                            HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY_DISCOVERED), "Number")
                     .withType(channelTypeUID).build();
 
             thingBuilder.withChannel(channel);
+            thingBuilder.withChannel(getThing().getChannel(HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY));
             updateThing(thingBuilder.build());
         } catch (Exception e) {
             logger.error("Could not add current activity channel to hub", e);
