@@ -8,11 +8,11 @@ The Harmony binding represents a "Hub" as a bridge thing type and "Devices" as t
 
 ###Hub
 
-A hub (bridge thing) represents a physical Harmony Hub.  The hub possesses a single channel with the id "currentActivity" which is a StringType set to the name of the current activity.  This channel is dynamically generated with the possible activity strings listed as channel state options. 
+A hub (bridge thing) represents a physical Harmony Hub.  The hub possesses a single channel with the id "activity" which is a StringType set to the name of the current activity.  This channel is dynamically generated with the possible activity strings listed as channel state options. 
 
 ###Devices
 
-Devices are dynamically created. There is a single device thing for every physical device configured on the harmony hub.  Each device has a single channel with the id "sendButtonPress" which sends a string with the name of the button to press on the device.  This channel is dynamically generated with the possible button press strings listed as channel state options. 
+Devices are dynamically created. There is a single device thing for every physical device configured on the harmony hub.  Each device has a single channel with the id "button" which sends a string with the name of the button to press on the device.  This channel is dynamically generated with the possible button press strings listed as channel state options. 
 
 ## Discovery
 
@@ -28,29 +28,36 @@ To manually configure a Harmony Hub thing you may specify its name ("name") as w
  
 In the thing file, this looks e.g. like
 ```
-Thing harmonyhub:hub:GreatRoom [ name="Great Room"]
+Bridge harmonyhub:hub:GreatRoom [ name="Great Room"]
 ```
 
 To manually configure a Harmony device thing you may specify its numeric id ("id") or its name ("name"), but not both. Note that this is prefixed by the hub the device is controlled from.
  
 In the thing file, this looks e.g. like
 ```
-Thing harmonyhub:device:GreatRoom:Denon [ id="21637347"]
+Bridge harmonyhub:hub:great [ name="Great Room"] {
+    device denon [ name="Denon AV Receiver"]
+}
 ```
-
+or
+```
+Bridge harmonyhub:hub:great [ name="Great Room"] {
+    device denon [ id=176254]
+}
+```
 ## Channels
 
 Hubs can report and change the current activity:
 
 items:
 ```
-String HarmonyGreatRoomActivity              "Current Activity [%s]"  (gMain) { channel="harmonyhub:hub:GreatRoom:currentActivity" }
+String HarmonyGreatRoomActivity              "Current Activity [%s]"  (gMain) { channel="harmonyhub:hub:GreatRoom:activity" }
 ```
 
 Devices can send button presses
 
 ```
-String HarmonyGreatRoomDenon            "Denon ButtonPress" (gMain) { channel="harmonyhub:device:GreatRoom:Denon:sendButtonPress" }
+String HarmonyGreatRoomDenon            "Denon Button Press" (gMain) { channel="harmonyhub:device:GreatRoom:Denon:button" }
 ```
 ##Example Sitemap
 

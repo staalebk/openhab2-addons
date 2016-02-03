@@ -18,6 +18,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.StringType;
@@ -69,6 +71,8 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
     // this can be overridden by a configuration option
     private static final int DISCO_TIME = 30;
 
+    private static final int RETRY_TIME = 60;
+
     private List<HubStatusListener> listeners = new CopyOnWriteArrayList<HubStatusListener>();
 
     private HarmonyClient client;
@@ -78,6 +82,8 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
     private Date cacheConfigExpireDate;
 
     private HarmonyHubHandlerFactory factory;
+
+    private ScheduledFuture<?> retryJob;
 
     public HarmonyHubHandler(Bridge bridge, HarmonyHubHandlerFactory factory) {
         super(bridge);
@@ -106,6 +112,10 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
     @Override
     public void initialize() {
         updateStatus(ThingStatus.INITIALIZING);
+
+        if (retryJob != null && !retryJob.isDone()) {
+            retryJob.cancel(false);
+        }
 
         final HarmonyHubConfig config = getConfig().as(HarmonyHubConfig.class);
         int discoTime = config.discoveryTimeout > 0 ? config.discoveryTimeout : DISCO_TIME;
@@ -140,15 +150,20 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
     @Override
     public void dispose() {
         listeners.clear();
+
+        if (retryJob != null && !retryJob.isDone()) {
+            retryJob.cancel(true);
+        }
+
         if (getClient() != null) {
             getClient().disconnect();
         }
     }
 
     @Override
-    protected void updateStatus(ThingStatus status) {
-        super.updateStatus(status);
-        // List<HubStatusListener> copy = new ArrayList<>(listeners);
+    protected void updateStatus(ThingStatus status, ThingStatusDetail detail, String comment) {
+        super.updateStatus(status, detail, comment);
+        logger.debug("Updating listeners with status {}", status);
         for (HubStatusListener listener : listeners) {
             listener.hubStatusChanged(status);
         }
@@ -191,14 +206,21 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
         try {
             logger.debug("Connecting: host {} sessionId {} accountId {}", host, sessionId, accountId);
             client.connect(host, new LoginToken(accountId, sessionId));
+            updateStatus(ThingStatus.ONLINE);
+            buildChannel();
         } catch (Exception e) {
-            logger.warn("Could not connect to HarmonyHub", e);
+            logger.error("Could not connect to HarmonyHub at " + host, e);
             client = null;
-            return;
-        }
+            retryJob = scheduler.schedule(new Runnable() {
 
-        buildChannel();
-        updateStatus(ThingStatus.ONLINE);
+                @Override
+                public void run() {
+                    initialize();
+                }
+            }, RETRY_TIME, TimeUnit.SECONDS);
+
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
+        }
     }
 
     private void updateState(Activity activity) {
@@ -235,9 +257,8 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
             ChannelTypeUID channelTypeUID = new ChannelTypeUID(
                     HarmonyHubBindingConstants.BINDING_ID + ":" + channelName);
 
-            ChannelType channelType = new ChannelType(channelTypeUID, true, "Number",
-                    HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY_DISCOVERED, "Current Activity", null, null,
-                    new StateDescription(null, null, null, "%s", false, states),
+            ChannelType channelType = new ChannelType(channelTypeUID, true, "Number", "Current Activity",
+                    "Current Activity", null, null, new StateDescription(null, null, null, "%s", false, states),
                     new URI(HarmonyHubBindingConstants.BINDING_ID, channelName, null));
 
             factory.addChannelType(channelType);
@@ -254,7 +275,7 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
             thingBuilder.withChannel(getThing().getChannel(HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY));
             updateThing(thingBuilder.build());
         } catch (Exception e) {
-            logger.error("Could not add current activity channel to hub", e);
+            logger.info("Could not add current activity channel to hub", e);
         }
     }
 

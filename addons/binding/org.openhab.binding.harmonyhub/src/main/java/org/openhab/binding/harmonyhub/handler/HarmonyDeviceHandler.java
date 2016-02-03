@@ -62,6 +62,7 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
     HarmonyHubHandlerFactory factory;
     int id;
     String name;
+    String logName;
 
     public HarmonyDeviceHandler(Thing thing, HarmonyHubHandlerFactory factory) {
         super(thing);
@@ -84,7 +85,7 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
             return;
         }
 
-        logger.debug("Pressing button {} on {}", command, id);
+        logger.debug("Pressing button {} on {}", command, id > 0 ? 0 : name);
 
         if (id > 0) {
             bridge.getClient().pressButton(id, command.toString());
@@ -105,7 +106,8 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
             logger.error("A harmony device thing must be configured with a device name OR a postive device id");
             updateStatus(ThingStatus.UNINITIALIZED, ThingStatusDetail.CONFIGURATION_ERROR);
         } else {
-            logger.debug("initializing {}", id);
+            logName = id > 0 ? String.valueOf(id) : name;
+            logger.debug("initializing {}", logName);
             updateStatus(ThingStatus.INITIALIZING);
         }
     };
@@ -113,7 +115,7 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
     @Override
     protected void bridgeHandlerInitialized(ThingHandler thingHandler, Bridge bridge) {
         if (thingHandler instanceof HarmonyHubHandler) {
-            logger.trace("bridgeHandlerInitialized for device {}", id);
+            logger.trace("bridgeHandlerInitialized for device {}", logName);
             this.bridge = (HarmonyHubHandler) thingHandler;
             this.bridge.addHubStatusListener(this);
         }
@@ -121,22 +123,23 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
 
     @Override
     protected void bridgeHandlerDisposed(ThingHandler thingHandler, Bridge bridge) {
-        logger.debug("bridgeHandlerDisposed for device {}", id);
+        logger.debug("bridgeHandlerDisposed for device {}", logName);
         this.bridge = null;
         updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.BRIDGE_OFFLINE);
     }
 
     @Override
     public void hubStatusChanged(ThingStatus status) {
+        logger.trace("hubStatusChanged {}  {}", logName, status);
         if (status.equals(ThingStatus.ONLINE)) {
-            updateChannel();
             updateStatus(ThingStatus.ONLINE);
+            updateChannel();
         }
     }
 
     private void updateChannel() {
         try {
-            logger.debug("updateChannel for device {}", id);
+            logger.debug("updateChannel for device {}", logName);
             List<StateOption> states = new LinkedList<StateOption>();
             List<Device> devices = bridge.getCachedConfig().getDevices();
 
@@ -180,7 +183,7 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
             thingBuilder.withChannel(getThing().getChannel(HarmonyHubBindingConstants.CHANNEL_BUTTON_PRESS));
             updateThing(thingBuilder.build());
         } catch (Exception e) {
-            logger.error("Could not add current activity channel to hub", e);
+            logger.error("Could not add button channels to device " + logName, e);
         }
     }
 }
