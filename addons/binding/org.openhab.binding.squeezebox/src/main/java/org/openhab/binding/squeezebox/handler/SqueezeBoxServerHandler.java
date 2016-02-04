@@ -307,6 +307,7 @@ public class SqueezeBoxServerHandler extends BaseBridgeHandler {
         try {
             listener = new SqueezeServerListener();
             listener.start();
+            updateStatus(ThingStatus.ONLINE);
             logger.info("Squeeze Server connection started to server " + this.host);
         } catch (IllegalThreadStateException e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getMessage());
@@ -351,11 +352,10 @@ public class SqueezeBoxServerHandler extends BaseBridgeHandler {
         public void run() {
             BufferedReader reader = null;
             try {
+                logger.debug("SqueezeServerListener running for host {}", host);
                 reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                updateStatus(ThingStatus.ONLINE);
                 requestPlayers();
                 sendCommand("listen 1");
-
                 String message;
                 while (!terminate && (message = reader.readLine()) != null) {
                     logger.debug("Message received: {}", message);
