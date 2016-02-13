@@ -113,7 +113,7 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
     };
 
     @Override
-    protected void bridgeHandlerInitialized(ThingHandler thingHandler, Bridge bridge) {
+    public void bridgeHandlerInitialized(ThingHandler thingHandler, Bridge bridge) {
         if (thingHandler instanceof HarmonyHubHandler) {
             logger.trace("bridgeHandlerInitialized for device {}", logName);
             this.bridge = (HarmonyHubHandler) thingHandler;
@@ -122,7 +122,7 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
     }
 
     @Override
-    protected void bridgeHandlerDisposed(ThingHandler thingHandler, Bridge bridge) {
+    public void bridgeHandlerDisposed(ThingHandler thingHandler, Bridge bridge) {
         logger.debug("bridgeHandlerDisposed for device {}", logName);
         this.bridge = null;
         updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.BRIDGE_OFFLINE);
