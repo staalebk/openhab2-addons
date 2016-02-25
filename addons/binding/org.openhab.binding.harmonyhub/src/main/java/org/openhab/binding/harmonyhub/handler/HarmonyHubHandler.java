@@ -225,8 +225,6 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
 
     private void updateState(Activity activity) {
         logger.debug("Updating current activity to {}", activity.getLabel());
-        updateState(new ChannelUID(getThing().getUID(), HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY_DISCOVERED),
-                new DecimalType(activity.getId()));
         updateState(new ChannelUID(getThing().getUID(), HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY),
                 new StringType(activity.getLabel()));
     }
@@ -252,7 +250,7 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
                 states.add(new StateOption(String.valueOf(activity.getId()), activity.getLabel()));
             }
 
-            String channelName = HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY_DISCOVERED
+            String channelName = HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY
                     + getThing().getProperties().get(HarmonyHubBindingConstants.HUB_PROPERTY_ID);
             ChannelTypeUID channelTypeUID = new ChannelTypeUID(
                     HarmonyHubBindingConstants.BINDING_ID + ":" + channelName);
@@ -267,15 +265,14 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
                     .withConfiguration(getThing().getConfiguration()).withProperties(getThing().getProperties());
 
             Channel channel = ChannelBuilder
-                    .create(new ChannelUID(getThing().getUID(),
-                            HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY_DISCOVERED), "Number")
+                    .create(new ChannelUID(getThing().getUID(), HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY),
+                            "Number")
                     .withType(channelTypeUID).build();
 
             thingBuilder.withChannel(channel);
-            thingBuilder.withChannel(getThing().getChannel(HarmonyHubBindingConstants.CHANNEL_CURRENT_ACTIVITY));
             updateThing(thingBuilder.build());
         } catch (Exception e) {
-            logger.info("Could not add current activity channel to hub", e);
+            logger.debug("Could not add current activity channel to hub", e);
         }
     }
 

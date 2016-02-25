@@ -161,8 +161,7 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
 
             ThingBuilder thingBuilder = editThing();
 
-            String channelName = HarmonyHubBindingConstants.CHANNEL_BUTTON_PRESS_DISCOVERED
-                    + getThing().getUID().getId();
+            String channelName = HarmonyHubBindingConstants.CHANNEL_BUTTON_PRESS + getThing().getUID().getId();
 
             ChannelTypeUID channelTypeUID = new ChannelTypeUID(
                     HarmonyHubBindingConstants.BINDING_ID + ":" + channelName);
@@ -175,15 +174,15 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
             factory.addChannelType(channelType);
 
             Channel channel = ChannelBuilder
-                    .create(new ChannelUID(getThing().getUID(),
-                            HarmonyHubBindingConstants.CHANNEL_BUTTON_PRESS_DISCOVERED), "String")
+                    .create(new ChannelUID(getThing().getUID(), HarmonyHubBindingConstants.CHANNEL_BUTTON_PRESS),
+                            "String")
                     .withType(channelTypeUID).build();
 
             thingBuilder.withChannels(channel);
             thingBuilder.withChannel(getThing().getChannel(HarmonyHubBindingConstants.CHANNEL_BUTTON_PRESS));
             updateThing(thingBuilder.build());
         } catch (Exception e) {
-            logger.error("Could not add button channels to device " + logName, e);
+            logger.debug("Could not add button channels to device " + logName, e);
         }
     }
 }

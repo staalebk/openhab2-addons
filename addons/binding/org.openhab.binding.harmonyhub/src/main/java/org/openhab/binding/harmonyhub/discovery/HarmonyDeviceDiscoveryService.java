@@ -80,7 +80,15 @@ public class HarmonyDeviceDiscoveryService extends AbstractDiscoveryService impl
             return;
         }
         logger.debug("getting devices on {}", bridge.getThing().getUID().getId());
-        HarmonyConfig config = bridge.getCachedConfig();
+        HarmonyConfig config = null;
+
+        try {
+            config = bridge.getCachedConfig();
+        } catch (Exception e) {
+            logger.debug("Could not get harmony config for discovery, skipping");
+            return;
+        }
+
         List<Device> devices = config.getDevices();
         for (Device device : devices) {
             String label = device.getLabel();

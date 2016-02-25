@@ -26,10 +26,8 @@ public class HarmonyHubBindingConstants {
 
     // List of all Channel ids
     public final static String CHANNEL_CURRENT_ACTIVITY = "currentActivity";
-    public final static String CHANNEL_CURRENT_ACTIVITY_DISCOVERED = "currentActivityDiscovered";
 
     public final static String CHANNEL_BUTTON_PRESS = "buttonPress";
-    public final static String CHANNEL_BUTTON_PRESS_DISCOVERED = "buttonPressDiscovered";
 
     public final static String HUB_PROPERTY_SESSIONID = "sessionId";
     public final static String HUB_PROPERTY_ACCOUNTID = "accountId";
