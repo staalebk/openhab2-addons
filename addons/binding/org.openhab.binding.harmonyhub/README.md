@@ -16,14 +16,15 @@ Devices are dynamically created. There is a single device thing for every physic
 
 ## Discovery
 
-The Harmony binding will automatically find all Harmony Hubs on the local network and add them to the inbox.
+The Harmony binding will automatically find all Harmony Hubs on the local network and add them to the inbox.  Once a Hub has been added, any connected devices will also added to the Inbox.
 
 ## Binding Configuration
 
 The binding requires no special configuration
 
 ## Thing Configuration
-
+This is optional, it is recommended to let the binding discover and add hubs and devices.
+ 
 To manually configure a Harmony Hub thing you may specify its name ("name") as well as an optional search timeout value in seconds ("discoveryTimeout") . 
  
 In the thing file, this looks e.g. like
@@ -57,7 +58,7 @@ String HarmonyGreatRoomActivity              "Current Activity [%s]"  (gMain) { 
 Devices can send button presses
 
 ```
-String HarmonyGreatRoomDenon            "Denon Button Press" (gMain) { channel="harmonyhub:device:GreatRoom:Denon:button" }
+String HarmonyGreatRoomDenon            "Denon Button Press" (gMain) { channel="harmonyhub:device:GreatRoom:29529817:buttonPress" }
 ```
 ##Example Sitemap
 
