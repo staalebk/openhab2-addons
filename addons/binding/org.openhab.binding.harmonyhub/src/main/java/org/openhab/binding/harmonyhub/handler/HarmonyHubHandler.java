@@ -169,6 +169,13 @@ public class HarmonyHubHandler extends BaseBridgeHandler {
         }
     }
 
+    @Override
+    public void channelLinked(ChannelUID channelUID) {
+        if (client != null) {
+            updateState(channelUID, new StringType(client.getCurrentActivity().getLabel()));
+        }
+    }
+
     /**
      * Connects to a Harmony Hub using credentials obtained through network discovery
      * x

@@ -125,7 +125,7 @@ public class HarmonyDeviceHandler extends BaseThingHandler implements HubStatusL
     public void bridgeHandlerDisposed(ThingHandler thingHandler, Bridge bridge) {
         logger.debug("bridgeHandlerDisposed for device {}", logName);
         this.bridge = null;
-        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.BRIDGE_OFFLINE);
+        super.bridgeHandlerDisposed(thingHandler, bridge);
     }
 
     @Override
