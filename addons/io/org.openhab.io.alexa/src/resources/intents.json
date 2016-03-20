@@ -1,0 +1,55 @@
+{
+  "intents": [
+    {
+      "intent": "CommandIntent",
+      "slots": [
+        {
+          "name": "Label",
+          "type": "LABEL"
+        },
+        {
+          "name": "Command",
+          "type": "COMMAND"
+        }
+      ]
+    },
+    {
+      "intent": "NumberIntent",
+      "slots": [
+        {
+          "name": "Label",
+          "type": "LABEL"
+        },
+        {
+          "name": "Number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "GetDeviceStatusIntent",
+      "slots": [
+        {
+          "name": "Label",
+          "type": "LABEL"
+        }
+      ]
+    },
+    {
+      "intent": "GetDevicesIntent",
+      "slots": []
+    },
+    {
+      "intent": "HelpIntent",
+      "slots": []
+    },
+    {
+      "intent": "StopIntent",
+      "slots": []
+    },
+    {
+      "intent": "CancelIntent",
+      "slots": []
+    }
+  ]
+}
