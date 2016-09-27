@@ -9,7 +9,9 @@
 package org.openhab.binding.autelis.handler;
 
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -29,6 +31,7 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.StringUtil;
+import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
@@ -65,6 +68,11 @@ import org.xml.sax.InputSource;
 public class AutelisHandler extends BaseThingHandler {
 
     private Logger logger = LoggerFactory.getLogger(AutelisHandler.class);
+
+    /**
+     * Date formatter for last update time
+     */
+    SimpleDateFormat DF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     /**
      * Default timeout for http connections to a Autelis controller
@@ -364,6 +372,8 @@ public class AutelisHandler extends BaseThingHandler {
                 logger.error("could not parse xml", e);
             }
         }
+        String time = DF.format(new Date());
+        updateState(new ChannelUID(getThing().getUID(), "lastupdate"), new DateTimeType(time));
     }
 
     /**
