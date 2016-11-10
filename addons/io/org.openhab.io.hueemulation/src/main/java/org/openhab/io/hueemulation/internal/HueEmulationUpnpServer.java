@@ -40,10 +40,12 @@ public class HueEmulationUpnpServer extends Thread {
     private String usn;
     private InetAddress address;
     private String discoveryIp;
+    private int webPort;
 
-    private String discoString = "HTTP/1.1 200 OK\r\n" + "CACHE-CONTROL: max-age=100\r\n" + "EXT:\r\n"
-            + "LOCATION: %s\r\n" + "SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n"
-            + "ST: urn:schemas-upnp-org:device:basic:1\r\n" + "USN: uuid:%s::urn:Belkin:device:**\r\n\r\n";
+    private String discoString = "HTTP/1.1 200 OK\r\n" + "HOST: %s:%d\r\n" + "EXT:\r\n"
+            + "CACHE-CONTROL: max-age=100\r\n" + "LOCATION: %s\r\n"
+            + "SERVER: FreeRTOS/7.4.2, UPnP/1.0, IpBridge/1.15.0\r\n" + "hue-bridgeid: %s\r\n"
+            + "ST: upnp:rootdevice\r\n" + "USN: uuid:%s::upnp:rootdevice\r\n\r\n";
 
     /**
      * Server to send UDP packets onto the network when requested by a Hue API compatible device.
@@ -55,10 +57,11 @@ public class HueEmulationUpnpServer extends Thread {
      * @param discoveryIP
      *            Optional IP to use advertise for UPNP, if null the first available non localhost IP will be used
      */
-    public HueEmulationUpnpServer(String discoPath, String usn, String discoveryIP) {
+    public HueEmulationUpnpServer(String discoPath, String usn, int webPort, String discoveryIP) {
         this.running = true;
         this.discoPath = discoPath;
         this.usn = usn;
+        this.webPort = webPort;
         this.discoveryIp = discoveryIP;
     }
 
@@ -105,11 +108,9 @@ public class HueEmulationUpnpServer extends Thread {
                         logger.trace("Got SSDP Discovery packet from " + recv.getAddress().getHostAddress() + ":"
                                 + recv.getPort());
                         if (data.startsWith("M-SEARCH")) {
-                            String msg = String
-                                    .format(discoString,
-                                            "http://" + address.getHostAddress().toString() + ":"
-                                                    + System.getProperty("org.osgi.service.http.port") + discoPath,
-                                            usn);
+                            String msg = String.format(discoString, MULTI_ADDR, UPNP_PORT_RECV,
+                                    "http://" + address.getHostAddress().toString() + ":" + webPort + discoPath, usn,
+                                    usn);
                             DatagramPacket response = new DatagramPacket(msg.getBytes(), msg.length(),
                                     recv.getAddress(), recv.getPort());
                             try {
