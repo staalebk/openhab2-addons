@@ -44,8 +44,8 @@ public class HueEmulationUpnpServer extends Thread {
 
     private String discoString = "HTTP/1.1 200 OK\r\n" + "HOST: %s:%d\r\n" + "EXT:\r\n"
             + "CACHE-CONTROL: max-age=100\r\n" + "LOCATION: %s\r\n"
-            + "SERVER: FreeRTOS/7.4.2, UPnP/1.0, IpBridge/1.15.0\r\n" + "hue-bridgeid: %s\r\n"
-            + "ST: upnp:rootdevice\r\n" + "USN: uuid:%s::upnp:rootdevice\r\n\r\n";
+            + "SERVER: FreeRTOS/7.4.2, UPnP/1.0, IpBridge/1.15.0\r\n" + "hue-bridgeid: %s\r\n" + "ST: %s\r\n"
+            + "USN: uuid:%s::upnp:rootdevice\r\n\r\n";
 
     /**
      * Server to send UDP packets onto the network when requested by a Hue API compatible device.
@@ -108,16 +108,24 @@ public class HueEmulationUpnpServer extends Thread {
                         logger.trace("Got SSDP Discovery packet from " + recv.getAddress().getHostAddress() + ":"
                                 + recv.getPort());
                         if (data.startsWith("M-SEARCH")) {
-                            String msg = String.format(discoString, MULTI_ADDR, UPNP_PORT_RECV,
-                                    "http://" + address.getHostAddress().toString() + ":" + webPort + discoPath, usn,
-                                    usn);
-                            DatagramPacket response = new DatagramPacket(msg.getBytes(), msg.length(),
-                                    recv.getAddress(), recv.getPort());
-                            try {
-                                logger.trace("Sending to " + recv.getAddress().getHostAddress() + " : " + msg);
-                                sendSocket.send(response);
-                            } catch (IOException e) {
-                                logger.error("Could not send UPNP response", e);
+                            String hueId = usn.substring(usn.length() - 12).toUpperCase();
+
+                            String[] stVersions = { "upnp:rootdevice", "urn:schemas-upnp-org:device:basic:1",
+                                    "uuid:" + usn };
+
+                            for (String st : stVersions) {
+                                String msg = String.format(discoString, MULTI_ADDR, UPNP_PORT_RECV,
+                                        "http://" + address.getHostAddress().toString() + ":" + webPort + discoPath,
+                                        hueId, st, usn);
+
+                                DatagramPacket response = new DatagramPacket(msg.getBytes(), msg.length(),
+                                        recv.getAddress(), recv.getPort());
+                                try {
+                                    logger.trace("Sending to " + recv.getAddress().getHostAddress() + " : " + msg);
+                                    sendSocket.send(response);
+                                } catch (IOException e) {
+                                    logger.error("Could not send UPNP response", e);
+                                }
                             }
                         }
                     }

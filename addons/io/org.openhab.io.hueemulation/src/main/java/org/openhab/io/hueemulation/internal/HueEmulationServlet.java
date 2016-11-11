@@ -21,6 +21,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -127,7 +128,7 @@ public class HueEmulationServlet extends HttpServlet {
                     LinkedHashMap<Integer, String> tmpMap = gson.fromJson(reader,
                             new TypeToken<Map<Integer, String>>() {
                             }.getType());
-                    if (tmpMap == null) {
+                    if (tmpMap != null) {
                         deviceMap.putAll(tmpMap);
                     }
                 } finally {
@@ -410,9 +411,12 @@ public class HueEmulationServlet extends HttpServlet {
      */
     public void apiGroupZero(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter out = resp.getWriter();
-        String[] lights = deviceMap.values().toArray(new String[0]);
+        List<String> lights = new LinkedList<String>();
+        for (Integer key : deviceMap.keySet()) {
+            lights.add(key.toString());
+        }
         HueState action = new HueState();
-        out.write(gson.toJson(new HueGroup("0", lights, action)));
+        out.write(gson.toJson(new HueGroup("Group 0", lights.toArray(new String[0]), action)));
         out.close();
     }
 
