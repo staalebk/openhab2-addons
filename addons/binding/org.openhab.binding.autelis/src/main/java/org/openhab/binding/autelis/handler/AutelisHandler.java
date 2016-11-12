@@ -313,7 +313,7 @@ public class AutelisHandler extends BaseThingHandler {
 
         // we will reconstruct the document with all the responses combined for
         // XPATH
-        StringBuilder sb = new StringBuilder("<response>");
+        StringBuilder sb = new StringBuilder();
 
         // pull down the three xml documents
         String[] statuses = { "status", "chem", "pumps" };
@@ -321,8 +321,7 @@ public class AutelisHandler extends BaseThingHandler {
             String response = getUrl(baseURL + "/" + status + ".xml", TIMEOUT);
             logger.trace(baseURL + "/" + status + ".xml \n {}", response);
             if (response == null) {
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR);
-                return;
+                continue;
             }
             // get the xml data between the response tags and append to our main
             // doc
@@ -331,12 +330,20 @@ public class AutelisHandler extends BaseThingHandler {
                 sb.append(m.group(1));
             }
         }
-        // finish our "new" XML Document
-        sb.append("</response>");
 
-        if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
-            updateStatus(ThingStatus.ONLINE);
+        if (sb.length() > 0) {
+            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
+                updateStatus(ThingStatus.ONLINE);
+            }
+        } else {
+            logger.error("No response from autelis controller");
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR);
+            return;
         }
+
+        // finish our "new" XML Document
+        sb.insert(0, "<response>");
+        sb.append("</response>");
 
         /*
          * This xmlDoc will now contain the three XML documents we retrieved
@@ -391,7 +398,7 @@ public class AutelisHandler extends BaseThingHandler {
             ContentResponse response = request.send();
             int statusCode = response.getStatus();
             if (statusCode != HttpStatus.OK_200) {
-                logger.debug("Method failed: {}", response.getStatus() + " " + response.getReason());
+                logger.debug("Method failed for {} : {} {}", url, response.getStatus(), response.getReason());
                 return null;
             }
             return response.getContentAsString();
