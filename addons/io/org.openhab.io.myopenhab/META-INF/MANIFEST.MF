@@ -3,7 +3,7 @@ Private-Package: org.openhab.io.myopenhab.internal
 Ignore-Package: org.openhab.io.myopenhab.internal
 Bundle-ManifestVersion: 2
 Bundle-Name: my.openHAB Service Bundle
-Bundle-SymbolicName: org.openhab.io.myopenhab
+Bundle-SymbolicName: org.openhab.io.myopenhab;singleton:=true
 Bundle-Version: 2.0.0.qualifier
 Service-Component: OSGI-INF/myopenhab.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -23,6 +23,7 @@ Import-Package: javax.net,
  org.eclipse.jetty.util,
  org.eclipse.jetty.util.component,
  org.eclipse.smarthome.config.core,
+ org.eclipse.smarthome.core.common,
  org.eclipse.smarthome.core.events,
  org.eclipse.smarthome.core.id,
  org.eclipse.smarthome.core.items,

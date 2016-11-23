@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
@@ -32,6 +34,7 @@ import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.util.URIUtil;
+import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openhab.core.OpenHAB;
@@ -119,6 +122,9 @@ public class MyOpenHABClient {
      * certain events from my.openHAB cloud back to openHAB
      */
     private MyOpenHABClientListener listener;
+
+    private ScheduledExecutorService executorService = ThreadPoolManager
+            .getScheduledPool(MyOpenHABClient.class.getName());
 
     /**
      * Constructor of MyOHClient
@@ -575,15 +581,26 @@ public class MyOpenHABClient {
                 logger.warn(result.getRequestFailure().getMessage());
                 logger.warn(result.getResponseFailure().getMessage());
             }
-            JSONObject responseJson = new JSONObject();
-            try {
-                responseJson.put("id", mRequestId);
-                socket.emit("responseFinished", responseJson);
-                logger.debug("Finished responding to request {}", mRequestId);
-            } catch (JSONException e) {
-                logger.error(e.getMessage());
-            }
 
+            /**
+             * What is this? In some cases where latency is very low the myopenhab service
+             * can receive responseFinished before the headers or content are received and I
+             * cannot find another workaround to prevent it.
+             */
+            executorService.schedule(new Runnable() {
+
+                @Override
+                public void run() {
+                    JSONObject responseJson = new JSONObject();
+                    try {
+                        responseJson.put("id", mRequestId);
+                        socket.emit("responseFinished", responseJson);
+                        logger.debug("Finished responding to request {}", mRequestId);
+                    } catch (JSONException e) {
+                        logger.error(e.getMessage());
+                    }
+                }
+            }, 1, TimeUnit.MILLISECONDS);
         }
 
         @Override
