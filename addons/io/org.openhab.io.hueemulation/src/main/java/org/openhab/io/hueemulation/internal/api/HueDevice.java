@@ -19,12 +19,13 @@ import java.util.Map;
  */
 public class HueDevice {
     public HueState state;
-    public String type = "Dimmable Light";
+    public String type = "Dimmable light";
     public String name;
     public String modelid = "LWB004";
     // public String uniqueid;
-    public String manufacturername = "openHAB";
-    public String swversion = "66009461";
+    public String manufacturername = "Philips";
+    public String swversion = "1.15.0_r18729";
+    public String productid = "Philips-LWB014-1-A19DLv3";
     public Map<String, String> pointsymbol;
 
     public HueDevice(HueState state, String name, String uniqueid) {
