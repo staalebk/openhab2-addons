@@ -20,7 +20,7 @@ import org.eclipse.smarthome.core.library.types.PercentType;
  */
 public class HueState {
     public boolean on;
-    public short bri = -1;
+    public short bri = 0;
     public int hue = 0;
     public short sat = 0;
     public double[] xy = { 0, 0 };
@@ -37,7 +37,7 @@ public class HueState {
     public HueState(short bri) {
         super();
         this.on = bri > 0;
-        this.bri = bri > 0 ? bri : -1;
+        this.bri = bri > 0 ? bri : 0;
     }
 
     public HueState(int h, short s, short b) {
@@ -52,7 +52,7 @@ public class HueState {
         this.on = hsb.getBrightness().intValue() > 0;
         this.hue = hsb.getHue().intValue();
         this.sat = hsb.getSaturation().shortValue();
-        this.bri = hsb.intValue() > 0 ? (short) ((hsb.intValue() * 255) / 100) : -1;
+        this.bri = hsb.intValue() > 0 ? (short) ((hsb.intValue() * 255) / 100) : 0;
     }
 
     /**
